@@ -9,11 +9,12 @@ function sortTimestamp(array) {
     return array
 }
 
-const timeline_first_time = 1299794404 //全投稿で一番早い時間
-//const timeline_first_time = 1299822360 //最初の画像入りテキストの時間
-const times = 10 //時間経過何倍するか設定 
+// const timeline_first_time = 1299794404 //全投稿で一番早い時間
+const timeline_first_time = 1299822360 //最初の画像入りテキストの時間
+let times = 50 //時間経過何倍するか設定 
 
-function displayCard_gamemaster(array, classname, start_time) {
+function displayCard_gamemaster(array, classname, start_time, diff) {
+    console.log(times)
     
     //newsクラスの１番上に表示されているidを取得
     //本当はgetElementしたかったけど、子要素が全然取ってこれなかったのでのでとりあえずSessionStorageを使用
@@ -27,16 +28,20 @@ function displayCard_gamemaster(array, classname, start_time) {
      
     const contents = sortTimestamp(array)
 
-    const sec = ((Date.now() - start_time) / 1000) * times
+    const sec = ((Date.now() - start_time) / 1000 - diff) * times
 
     for (i = start_i; i < contents.length; i++) {
         const content = contents[i]
+        if (content.timestamp > 1299822360) {
+            times = 12
+        }
         if (sec < (content.timestamp - timeline_first_time)) {
             sessionStorage.setItem('displayedLastId_gamemaster',contents[i-1].id)
             break
         }
 
         if (i == start_i) {
+            $('.toast').toast({ delay: 6000 }).toast('show')
             const gamemaster = document.getElementById('gamemaster')
             const newtext = gamemaster.getElementsByClassName('text-danger')
             const len = newtext.length
@@ -89,7 +94,7 @@ function displayCard_gamemaster(array, classname, start_time) {
     } 
 }
 
-function displayCard_news(array, classname, start_time) {
+function displayCard_news(array, classname, start_time, diff){
     
     //newsクラスの１番上に表示されているidを取得
     //本当はgetElementしたかったけど、子要素が全然取ってこれなかったのでのでとりあえずSessionStorageを使用
@@ -103,7 +108,7 @@ function displayCard_news(array, classname, start_time) {
      
     const contents = sortTimestamp(array)
 
-    const sec = ((Date.now() - start_time) / 1000) * times
+    const sec = ((Date.now() - start_time) / 1000 - diff) * times
 
     for (i = start_i; i < contents.length; i++) {
         const content = contents[i]
@@ -196,7 +201,7 @@ function displayCard_news(array, classname, start_time) {
         parentDiv.prepend(newCard)
     } 
 }
-function displayCard_tweets(array, classname, start_time) {
+function displayCard_tweets(array, classname, start_time, diff) {
     
     //newsクラスの１番上に表示されているidを取得
     //本当はgetElementしたかったけど、子要素が全然取ってこれなかったのでのでとりあえずSessionStorageを使用
@@ -209,7 +214,7 @@ function displayCard_tweets(array, classname, start_time) {
     }
     const contents = sortTimestamp(array)
 
-    const sec = ((Date.now() - start_time) / 1000) * times
+    const sec = ((Date.now() - start_time) / 1000 - diff) * times
 
     for (i = start_i; i < contents.length; i++) {
         const content = contents[i]
@@ -366,10 +371,44 @@ function deleteClip(event) {
     })
     sessionStorage.setItem('clips', JSON.stringify(clips))
     displayCard_clips(clips,'clips')
-    
 }
 
+function restartButtonClick(event) {
+    console.log('button')
+    console.log(event.target)
+    let newsTimerID = sessionStorage.getItem('newsTimerID')
+    let tweetsTimerID = sessionStorage.getItem('tweetsTimerID')
+    let gamemasterTimerID = sessionStorage.getItem('gamemasterTimerID')
+    if (newsTimerID == 0) {
+        event.target.innerText = 'タイムライン一時停止' 
+        const stoptime = sessionStorage.getItem('stoptime')
+        const addDiff = (Date.now() - stoptime) / 1000
+        diff += addDiff
+        const newsContents = JSON.parse(sessionStorage.getItem('news'))
+        const tweetsContents = JSON.parse(sessionStorage.getItem('tweets'))
+        const gamemasterContents = JSON.parse(sessionStorage.getItem('gamemaster'))
+        newsTimerID = setInterval(displayCard_news, 1000,newsContents,"news",starttime,diff)
+        tweetsTimerID = setInterval(displayCard_tweets, 1000,tweetsContents,"tweets",starttime,diff)
+        gamemasterTimerID = setInterval(displayCard_gamemaster, 1000,gamemasterContents,"gamemaster",starttime,diff)
+        sessionStorage.setItem('newsTimerID',newsTimerID)
+        sessionStorage.setItem('tweetsTimerID',tweetsTimerID)
+        sessionStorage.setItem('gamemasterTimerID',gamemasterTimerID)
+    } else {
+        event.target.innerText = 'タイムライン再生' 
+        const stoptime = Date.now()
+        sessionStorage.setItem('stoptime', stoptime)
+        clearInterval(newsTimerID)
+        clearInterval(tweetsTimerID)
+        clearInterval(gamemasterTimerID)
+        sessionStorage.setItem('newsTimerID',0)
+        sessionStorage.setItem('tweetsTimerID',0)
+        sessionStorage.setItem('gamemasterTimerID',0)
+    }
+}
 
+const starttime = Date.now()
+let diff = 0
+sessionStorage.setItem('starttime',starttime)
 $.ajax({
     // 読み込みの設定
     type: "GET",
@@ -389,9 +428,9 @@ $.ajax({
             cardContents.push({ 'id': 'news' + idx, 'timestamp': timestamp, 'text': text, 'imgurl': imgurl }) 
         })
         sessionStorage.setItem('news', JSON.stringify(cardContents))
-        const start_time = Date.now()
         sessionStorage.setItem('displayedLastId_news', -1)
-        setInterval(displayCard_news, 10000,cardContents,"news",start_time)
+        const newsTimerID = setInterval(displayCard_news, 1000,cardContents,"news",starttime,0)
+        sessionStorage.setItem('newsTimerID',newsTimerID)
     },
     function () {
         // 読み込み失敗時の処理
@@ -418,9 +457,9 @@ $.ajax({
             cardContents.push({ 'id':'tweets'+idx,'timestamp': timestamp, 'text': text}) 
         })
         sessionStorage.setItem('tweets', JSON.stringify(cardContents))
-        const start_time = Date.now()
         sessionStorage.setItem('displayedLastId_tweets', -1)
-        setInterval(displayCard_tweets, 10000,cardContents,"tweets",start_time)
+        const tweetsTimerID = setInterval(displayCard_tweets, 1000,cardContents,"tweets",starttime,0)
+        sessionStorage.setItem('tweetsTimerID',tweetsTimerID)
     },
     function () {
         // 読み込み失敗時の処理
@@ -447,9 +486,9 @@ $.ajax({
             cardContents.push({ 'id':'gamemaster'+idx,'timestamp': timestamp, 'text': text}) 
         })
         sessionStorage.setItem('gamemaster', JSON.stringify(cardContents))
-        const start_time = Date.now()
         sessionStorage.setItem('displayedLastId_gamemaster', -1)
-        setInterval(displayCard_gamemaster, 10000,cardContents,"gamemaster",start_time)
+        const gamemasterTimerID = setInterval(displayCard_gamemaster, 1000, cardContents, "gamemaster", starttime, 0)
+        sessionStorage.setItem('gamemasterTimerID',gamemasterTimerID)
     },
     function () {
         // 読み込み失敗時の処理
