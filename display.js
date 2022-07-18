@@ -32,9 +32,6 @@ function displayCard_gamemaster(array, classname, start_time, diff) {
 
     for (i = start_i; i < contents.length; i++) {
         const content = contents[i]
-        if (content.timestamp > 1299822360) {
-            times = 12
-        }
         if (sec < (content.timestamp - timeline_first_time)) {
             sessionStorage.setItem('displayedLastId_gamemaster',contents[i-1].id)
             break
@@ -222,6 +219,10 @@ function displayCard_tweets(array, classname, start_time, diff) {
         if (sec < (content.timestamp - timeline_first_time)) {
             sessionStorage.setItem('displayedLastId_tweets',contents[i-1].id)
             break
+        }
+
+        if (content.timestamp > 1299822360) {
+            times = 12
         }
 
         if (i == start_i) {
