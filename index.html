@@ -13,21 +13,23 @@
 
 <body>
     <div class="container">
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a href="#news" class="nav-link" data-toggle="tab">ニュース</a>
-            </li>
-            <li class="nav-item">
-                <a href="#tweets" class="nav-link" data-toggle="tab">ツイート</a>
-            </li>
-            <li class="nav-item">
-                <a href="#clips" class="nav-link active" data-toggle="tab">クリップしたやつ</a>
-            </li>
-            <li class="nav-item">
-                <a href="#gamemaster" class="nav-link " data-toggle="tab">ゲームマスター</a>
-            </li>
-        </ul>
-        <button type="button" class="btn btn-primary" id="restartbutton" onclick="restartButtonClick(event)">タイムライン一時停止</button>
+        <header class="sticky-top">
+            <ul class="nav nav-tabs bg-white">
+                <li class="nav-item">
+                    <a href="#news" class="nav-link" data-toggle="tab">ニュース</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#tweets" class="nav-link" data-toggle="tab">ツイート</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#clips" class="nav-link active" data-toggle="tab">クリップ済アイテム</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#gamemaster" class="nav-link " data-toggle="tab" id="gamemaster-tab" onclick="clickGamemasterTab(event)">ゲームマスター</a>
+                </li>
+            </ul>
+            <button type="button" class="btn btn-primary" id="restartbutton" onclick="restartButtonClick(event)">タイムラインを一時停止する</button>
+        </header>
         <div class="tab-content">
             <div id="news" class="tab-pane">
             </div>
@@ -39,7 +41,7 @@
             </div>
         </div>
     </div>
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top: 0; right: 0; width:20em;">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top: 20; right: 0; width:20em;">
         <div class="toast-header">
             <strong class="mr-auto">ゲームマスター通知</strong>
             <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
