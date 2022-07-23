@@ -11,7 +11,8 @@ function sortTimestamp(array) {
 
 // const timeline_first_time = 1299794404 //全投稿で一番早い時間
 // const timeline_first_time = 1299822360 //最初の画像入りテキストの時間
-const timeline_first_time = 1299817800 //13:30
+// const timeline_first_time = 1299817800 //13:30
+const timeline_first_time = 1299812400 //12:00
 var times = 14 //時間経過何倍するか設定 
 
 function displayCard_gamemaster(array, classname, start_time, diff) {
